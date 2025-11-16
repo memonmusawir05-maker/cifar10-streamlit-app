@@ -1,0 +1,35 @@
+import streamlit as st
+import numpy as np
+from PIL import Image
+from tensorflow.keras.models import load_model
+
+st.title("🚀 CIFAR-10 Image Classifier")
+st.write("Upload an image and the model will predict one of 10 classes.")
+
+# Load model
+model = load_model("cifar10_model.h5")
+
+# CIFAR-10 labels
+class_names = [
+    'airplane','automobile','bird','cat','deer',
+    'dog','frog','horse','ship','truck'
+]
+
+uploaded_file = st.file_uploader("Upload Image", type=["jpg","jpeg","png"])
+
+if uploaded_file:
+    img = Image.open(uploaded_file)
+    st.image(img, caption="Uploaded Image", width=200)
+
+    # Preprocess
+    img_resized = img.resize((32,32))
+    img_array = np.array(img_resized).astype("float32") / 255.0
+    img_array = np.expand_dims(img_array, axis=0)
+
+    # Predict
+    prediction = model.predict(img_array)
+    index = np.argmax(prediction)
+    confidence = np.max(prediction)
+
+    st.write("### 🧠 Prediction:", class_names[index])
+    st.write("### 🔥 Confidence:", round(confidence, 3))
